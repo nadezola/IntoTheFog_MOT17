@@ -56,10 +56,12 @@ def run(image_list, model_path, model_type="dpt_beit_large_512", height=None):
             prediction = (torch.nn.functional.interpolate(prediction.unsqueeze(1),
                                                           size=target_size,
                                                           mode="nearest").squeeze().cpu().numpy())
-            prediction = normalize(prediction)
+            #prediction = normalize(prediction)
         depth_maps[idx] = prediction
 
-    return depth_maps
+    depth_maps_normalized = depth_maps / np.max(depth_maps)
+
+    return 1 - depth_maps_normalized
 
 
 def save_depth(depth_maps, image_list, output_path):
