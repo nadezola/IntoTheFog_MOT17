@@ -7,7 +7,7 @@ import opt
 
 def fog_optical_model(image, depth, thickness, atm_light):
     beta = opt.beta[thickness - 1]
-    T = np.exp(-beta * depth * opt.depth_scale)
+    T = np.exp(-beta * depth)
     L_inf = np.mean(atm_light)
     fog_img = T * image + L_inf * (1-T)
 
