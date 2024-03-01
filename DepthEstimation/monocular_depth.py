@@ -23,27 +23,31 @@ def plot_depth_map(inv_depth, depth, output_path, file_name):
     y = np.arange(depth.shape[0])
     xx, yy = np.meshgrid(x, y)
 
-    fig = plt.figure(figsize=plt.figaspect(0.25))
+    fig = plt.figure(figsize=plt.figaspect(0.5))
 
     # Depth subplot
-    ax = fig.add_subplot(1, 3, 1, projection='3d')
-    ax.plot_surface(xx, yy, depth, cmap=cm.coolwarm)
-    ax.set_xlabel('Width')
-    ax.set_ylabel('Height')
-    ax.set_title('Depth Map')
+    ax = fig.add_subplot(1, 2, 1, projection='3d')
+    ax.plot_surface(-xx, yy, -depth+30,  vmin=0., vmax=35., cmap=cm.coolwarm)
+    #ax.set_xlabel('Width')
+    #ax.set_ylabel('Height')
+    ax.set_title('Metric Depth Map')
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_zticklabels([])
+    ax.azim = -45
+    ax.elev = 45
 
     # Invert depth subplot
-    ax = fig.add_subplot(1, 3, 2, projection='3d')
-    ax.plot_surface(xx, yy, inv_depth, cmap=cm.coolwarm)
-    ax.set_xlabel('Width')
-    ax.set_ylabel('Height')
-    ax.set_title('Inverse Depth Map')
-
-    # Distribution plot
-    ax = fig.add_subplot(1, 3, 3)
-    ax.plot(inv_depth.flatten())
-    ax.set_xlabel('Pixels')
-    ax.set_title('Distribution')
+    ax = fig.add_subplot(1, 2, 2, projection='3d')
+    ax.plot_surface(-xx, yy, inv_depth, cmap=cm.coolwarm)
+    #ax.set_xlabel('Width')
+    #ax.set_ylabel('Height')
+    ax.set_title('MiDaS Relative Depth Map')
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_zticklabels([])
+    ax.azim = -45
+    ax.elev = 45
 
     fig.savefig(str(output_path / file_name) + '.png')
     plt.close(fig)

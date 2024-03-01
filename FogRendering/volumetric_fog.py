@@ -15,7 +15,8 @@ def fog_optical_model(image, depth, thickness, atm_light):
 
 
 def fog_rendering(image_list, depth_maps, output_path):
-    atm_light = atmospheric_light.calculate_horizon_intensity(image_list, depth_maps, threshold=opt.horizon)
+    atm_light = atmospheric_light.horizon_intensity(image_list, depth_maps, 0.9*opt.max_dist)
+    #atm_light = atmospheric_light.image_intensity(image_list)
 
     fog_path = output_path / 'fog'
     for thickness in opt.THICKNESS:

@@ -7,9 +7,9 @@ from FogRendering import volumetric_fog
 def parth_args():
     # more options in opt.py
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input', default='data/mot17/val/clear/images/MOT17-02',
+    parser.add_argument('--input', default='data/mot17/debug/clear/images/MOT17-02',
                         help='Path to the clear weather images')
-    parser.add_argument('--out', default='outputs/mot17/val/MOT17-02',
+    parser.add_argument('--out', default='outputs/mot17/debug/MOT17-02',
                         help='Output path')
 
     args = parser.parse_args()
