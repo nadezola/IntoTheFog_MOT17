@@ -65,21 +65,28 @@ def save_depth(inv_depth, output_path, file_name):
     cv2.imwrite(inv_depth_file, inv_depth.astype(np.uint16))
 
 
-def normalize(depth):
-    if not np.isfinite(depth).all():
-        depth=np.nan_to_num(depth, nan=0.0, posinf=0.0, neginf=0.0)
+def normalize(map):
+    if not np.isfinite(map).all():
+        map=np.nan_to_num(map, nan=0.0, posinf=0.0, neginf=0.0)
         print("WARNING: Non-finite depth values present")
 
-    depth_min = depth.min()
-    depth_max = depth.max()
+    map_min = map.min()
+    map_max = map.max()
 
-    if depth_max - depth_min > np.finfo("float").eps:
-        depth_normalized = (depth - depth_min) / (depth_max - depth_min)
+    if map_max - map_min > np.finfo("float").eps:
+        map_normalized = (map - map_min) / (map_max - map_min)
     else:
-        depth_normalized = np.zeros(depth.shape, dtype=depth.dtype)
+        map_normalized = np.zeros(map.shape, dtype=map.dtype)
 
-    return depth_normalized
+    return map_normalized
 
+
+def metric(normalized_map):
+    scale = (1 / opt.min_dist) - (1 / opt.max_dist)
+    shift = 1 / opt.max_dist
+    metric_map = 1 / (scale * normalized_map + shift)
+
+    return metric_map
 
 
 def run(image_list, output_path, model_path, model_type="dpt_beit_large_512", height=None):
@@ -110,14 +117,14 @@ def run(image_list, output_path, model_path, model_type="dpt_beit_large_512", he
             inv_depth = (torch.nn.functional.interpolate(inv_depth.unsqueeze(1),
                                                          size=target_size,
                                                          mode="nearest").squeeze().cpu().numpy())
-            # Normalize
+            # Normalize inv_depth
             inv_depth_normalize = normalize(inv_depth)
-            save_depth(inv_depth_normalize, output_path, img_file.stem)
 
             # Metric Depth
-            scale = (1 / opt.min_dist) - (1 / opt.max_dist)
-            shift = 1 / opt.max_dist
-            depth = 1/(scale * inv_depth_normalize + shift)
+            depth = metric(inv_depth_normalize)
+
+            # Save and visualize
+            save_depth(inv_depth_normalize, output_path, img_file.stem)
             plot_depth_map(inv_depth_normalize, depth, output_path, img_file.stem)
 
         depth_maps.append(depth)
