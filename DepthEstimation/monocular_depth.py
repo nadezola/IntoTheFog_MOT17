@@ -15,7 +15,6 @@ import opt
 
 
 def plot_depth_map(inv_depth, depth, output_path, file_name):
-    output_path = output_path / 'plots'
     if not output_path.exists():
         output_path.mkdir(parents=True)
 
@@ -27,25 +26,26 @@ def plot_depth_map(inv_depth, depth, output_path, file_name):
 
     # Depth subplot
     ax = fig.add_subplot(1, 2, 1, projection='3d')
-    ax.plot_surface(-xx, yy, -depth+30,  vmin=0., vmax=35., cmap=cm.coolwarm)
-    #ax.set_xlabel('Width')
-    #ax.set_ylabel('Height')
-    ax.set_title('Metric Depth Map')
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.set_zticklabels([])
+    ax.plot_surface(-xx, yy, -depth+30,  vmin=10., vmax=35., cmap=cm.coolwarm)
+    #ax.plot_surface(-xx, yy, depth,  cmap=cm.coolwarm)
+    ax.set_xlabel('Width')
+    ax.set_ylabel('Height')
+    ax.set_title('Metric Depth')
+    # ax.set_xticklabels([])
+    # ax.set_yticklabels([])
+    # ax.set_zticklabels([])
     ax.azim = -45
     ax.elev = 45
 
     # Invert depth subplot
     ax = fig.add_subplot(1, 2, 2, projection='3d')
     ax.plot_surface(-xx, yy, inv_depth, cmap=cm.coolwarm)
-    #ax.set_xlabel('Width')
-    #ax.set_ylabel('Height')
-    ax.set_title('MiDaS Relative Depth Map')
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.set_zticklabels([])
+    ax.set_xlabel('Width')
+    ax.set_ylabel('Height')
+    ax.set_title('Aligned normalized MiDaS inverse depth')
+    # ax.set_xticklabels([])
+    # ax.set_yticklabels([])
+    # ax.set_zticklabels([])
     ax.azim = -45
     ax.elev = 45
 
@@ -54,7 +54,6 @@ def plot_depth_map(inv_depth, depth, output_path, file_name):
 
 
 def save_depth(inv_depth, output_path, file_name):
-    output_path = output_path / 'depth'
     if not output_path.exists():
         output_path.mkdir(parents=True)
 
@@ -65,25 +64,40 @@ def save_depth(inv_depth, output_path, file_name):
     cv2.imwrite(inv_depth_file, inv_depth.astype(np.uint16))
 
 
-def normalize(map):
-    if not np.isfinite(map).all():
-        map=np.nan_to_num(map, nan=0.0, posinf=0.0, neginf=0.0)
-        print("WARNING: Non-finite depth values present")
+def normalize(values, scope=(0, 1)):
+    if not np.isfinite(values).all():
+        values = np.nan_to_num(values, nan=0.0, posinf=0.0, neginf=0.0)
+        print("WARNING: Non-finite values present")
 
-    map_min = map.min()
-    map_max = map.max()
+    values_min = values.min()
+    values_max = values.max()
 
-    if map_max - map_min > np.finfo("float").eps:
-        map_normalized = (map - map_min) / (map_max - map_min)
+    if values_max - values_min > np.finfo("float").eps:
+        scale = (scope[1] - scope[0]) / (values_max - values_min)
+        shift = scope[0] - scale * values_min
+        values_normalized = scale * values + shift
     else:
-        map_normalized = np.zeros(map.shape, dtype=map.dtype)
+        values_normalized = np.zeros(values.shape, dtype=values.dtype)
 
-    return map_normalized
+    return values_normalized
 
 
-def metric(normalized_map):
-    scale = (1 / opt.min_dist) - (1 / opt.max_dist)
-    shift = 1 / opt.max_dist
+def align_depth(map, ref_map):
+    grid_step = 100
+    map_grid = map[::grid_step, ::grid_step].flatten()
+    ref_grid = ref_map[::grid_step, ::grid_step].flatten()
+
+    A = np.vstack([map_grid, np.ones(len(map_grid))]).T
+    s, t = np.linalg.lstsq(A, ref_grid, rcond=None)[0]
+
+    aligned_map = s * map + t
+
+    return aligned_map
+
+
+def metric(normalized_map, min_dist, max_dist):
+    scale = (1 / min_dist) - (1 / max_dist)
+    shift = 1 / max_dist
     metric_map = 1 / (scale * normalized_map + shift)
 
     return metric_map
@@ -99,6 +113,7 @@ def run(image_list, output_path, model_path, model_type="dpt_beit_large_512", he
                                                 optimize=False,
                                                 height=height)
 
+    t0_inv_depth_map = None
     depth_maps = []
     for idx, img_file in tqdm(enumerate(image_list), total=len(image_list),
                              desc="Monocular Depth estimation"):
@@ -106,28 +121,38 @@ def run(image_list, output_path, model_path, model_type="dpt_beit_large_512", he
         orig_image = cv2.cvtColor(cv2.imread(str(img_file)), cv2.COLOR_BGR2RGB) / 255.0
         target_size = orig_image.shape[:-1]
         image = transform({"image": orig_image})["image"]
-
         with torch.no_grad():
             sample = torch.from_numpy(image).to(device).unsqueeze(0)
 
             # Prediction
-            inv_depth = model.forward(sample)
+            pred_inv_depth_map = model.forward(sample)
 
             # Interpolate to original size
-            inv_depth = (torch.nn.functional.interpolate(inv_depth.unsqueeze(1),
-                                                         size=target_size,
-                                                         mode="nearest").squeeze().cpu().numpy())
-            # Normalize inv_depth
-            inv_depth_normalize = normalize(inv_depth)
+            pred_inv_depth_map = (torch.nn.functional.interpolate(pred_inv_depth_map.unsqueeze(1),
+                                                                  size=target_size,
+                                                                  mode="nearest").squeeze().cpu().numpy())
+        # Align depth
+        if t0_inv_depth_map is not None:
+            aligned_inv_depth_map = align_depth(pred_inv_depth_map, t0_inv_depth_map)
+        else:
+            aligned_inv_depth_map = pred_inv_depth_map
 
-            # Metric Depth
-            depth = metric(inv_depth_normalize)
+        t0_inv_depth_map = aligned_inv_depth_map
 
-            # Save and visualize
-            save_depth(inv_depth_normalize, output_path, img_file.stem)
-            plot_depth_map(inv_depth_normalize, depth, output_path, img_file.stem)
+        # Normalize inv_depth
+        norm_inv_depth_map = normalize(aligned_inv_depth_map)
 
-        depth_maps.append(depth)
+        # Metric Depth
+        seq_name = img_file.parent.stem
+        depth_map = metric(norm_inv_depth_map,
+                           min_dist=opt.metric_info[seq_name]['min_dist'],
+                           max_dist=opt.metric_info[seq_name]['max_dist'])
+
+        # Save and visualize
+        save_depth(norm_inv_depth_map, output_path / 'inv_relative_depth', img_file.stem)
+        plot_depth_map(norm_inv_depth_map, depth_map, output_path / 'plots', img_file.stem)
+
+        depth_maps.append(depth_map)
 
     return np.array(depth_maps)
 
