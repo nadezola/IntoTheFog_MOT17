@@ -1,10 +1,14 @@
 import numpy as np
 import cv2
-from tqdm import tqdm
-from FogRendering import atmospheric_light
-from DepthEstimation.monocular_depth import normalize, metric
-from perlin_numpy import generate_fractal_noise_2d
 from matplotlib import pyplot as plt
+from tqdm import tqdm
+
+from perlin_numpy import generate_fractal_noise_2d
+
+from FogRendering import atmospheric_light
+from DepthEstimation.utils import normalize
+from DepthEstimation.metric_estimation import metric
+
 import opt
 
 
@@ -30,8 +34,8 @@ def fog_optical_model(image, depth, thickness, atm_light, heterogeneous, seq_nam
     if heterogeneous:
         turbulence_texture = perlin_noise_map(image.shape[:2], cloud_brightness, plot=plot)
         turbulence = metric(turbulence_texture,
-                            min_dist=opt.metric_info[seq_name]['min_dist'],
-                            max_dist=opt.metric_info[seq_name]['max_dist'])
+                            min_dist=opt.seq_info[seq_name]['min_dist'],
+                            max_dist=opt.seq_info[seq_name]['max_dist'])
         turbulence = np.expand_dims(turbulence, 2)
         T = np.exp(-beta * depth * turbulence)
     else:
@@ -49,9 +53,11 @@ def fog_rendering(image_list, depth_maps, output_path):
     heterogeneous = opt.heterogeneous_fog
 
     # Atmospheric light
-    atm_light = atmospheric_light.horizon_intensity(image_list, depth_maps, 0.9*opt.metric_info[seq_name]['max_dist'])
-    #atm_light = atmospheric_light.image_intensity(image_list)
-    #atm_light = 0.8
+    if opt.seq_info[seq_name]['horizon']:
+        atm_light = atmospheric_light.horizon_intensity(image_list, depth_maps, 0.9*opt.seq_info[seq_name]['max_dist'])
+    else:
+        atm_light = atmospheric_light.image_intensity(image_list)
+        #atm_light = 0.8
 
     # Check Heterogeneous
     if heterogeneous:
@@ -67,12 +73,12 @@ def fog_rendering(image_list, depth_maps, output_path):
 
     # Fog Rendering
     for thickness, visib in enumerate(opt.visibility):
-        save_path = fog_path / f'{visib}m'
+        save_path = fog_path / f'{visib}'
         if not save_path.exists():
             save_path.mkdir(parents=True)
 
         for idx in tqdm(range(len(image_list)),
-                        desc=f'Fog Rendering {visib}m'):
+                        desc=f'Fog Rendering {visib}'):
 
             img = cv2.cvtColor(cv2.imread(str(image_list[idx])), cv2.COLOR_BGR2RGB) / 255.0
             depth = np.expand_dims(depth_maps[idx], axis=2)
