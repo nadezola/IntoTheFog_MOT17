@@ -1,0 +1,3 @@
+[submodule "MiDaS"]
+	path = DepthEstimation/MiDaS
+	url = https://github.com/isl-org/MiDaS.git

@@ -1,0 +1,7 @@
+data/mot17/*
+outputs/*
+DepthEstimation/weights/*
+log.txt
+
+!data/mot17/.gitkeep
+!DepthEstimation/weights/.gitkeep
