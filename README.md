@@ -12,9 +12,17 @@ Nadezda Kirillova, Muhammad Jehanzeb Mirza, Horst Possegger, Horst Bischof
 ## Fog in MOT17 dataset
 Clear images are taken from [MOTChallenge benchmark](https://motchallenge.net/data/MOT17Det/)
 
+* Daytime front-view square captured by a static camera:
+
 https://github.com/nadezola/IntoTheFog_MOT17/assets/53909145/310bb1fb-bbeb-401f-9774-e488a360fa1d
 
+*  Heavily illuminated night crowd square captured by a surveillance camera:
+
 https://github.com/nadezola/IntoTheFog_MOT17/assets/53909145/91de7368-934a-4bb1-99f4-17bdf1123884
+
+* Close up indoor sceen captured by a low angle static camera:
+
+https://github.com/nadezola/IntoTheFog_MOT17/assets/53909145/f58e3f9c-70d8-4ac6-9299-9c415fd15a75
 
 
 ## Setup
