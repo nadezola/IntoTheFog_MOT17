@@ -6,7 +6,7 @@ import logging
 from datetime import datetime
 
 from dataprocess import ClearDataset
-from DepthEstimation import monocular_depth, metric_depth
+from DepthEstimation import monocular_depth, metric_depth, temporal
 from FogRendering import volumetric_fog
 import opt
 
@@ -18,9 +18,9 @@ logging.basicConfig(level=logging.INFO,
 def parth_args():
     # more options in opt.py
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input', default='data/mot17/train/clear/images',
+    parser.add_argument('--input', default='data/mot17/val/clear/images',
                         help='Root of clear images')
-    parser.add_argument('--out', default='outputs/EXPS-FOG/mot17/train',
+    parser.add_argument('--out', default='outputs/EXPS-FOG/mot17/val_final_temporal',
                         help='Output root')
     parser.add_argument('--loaddepth', action='store_true',
                         help='Load depth images instead of depth estimation')
@@ -42,12 +42,12 @@ if __name__ == '__main__':
     # clear_folders = sorted(list(clear_root.glob('*')))
     clear_folders = [
         clear_root / 'MOT17-02',
-        clear_root / 'MOT17-04',
-        clear_root / 'MOT17-05',
-        clear_root / 'MOT17-09',
-        clear_root / 'MOT17-10',
-        clear_root / 'MOT17-11',
-        clear_root / 'MOT17-13'
+        # clear_root / 'MOT17-04',
+        # clear_root / 'MOT17-05',
+        # clear_root / 'MOT17-09',
+        # clear_root / 'MOT17-10',
+        # clear_root / 'MOT17-11',
+        # clear_root / 'MOT17-13'
     ]
     for clr_folder in clear_folders:
         logger.info(f'{(datetime.now()).strftime("%d-%m-%Y %H:%M:%S")}')
@@ -62,5 +62,6 @@ if __name__ == '__main__':
             pred_inv_depth_maps = monocular_depth.estimate(cleardata=clr_data,
                                                            model_path="DepthEstimation/weights/dpt_beit_large_512.pt",
                                                            model_type="dpt_beit_large_512")
-        depth_maps = metric_depth.estimate(inv_depth_maps=pred_inv_depth_maps, cleardata=clr_data)
+        aligned_depth_maps = temporal.align_depth_maps(pred_inv_depth_maps)
+        depth_maps = metric_depth.estimate(inv_depth_maps=aligned_depth_maps, cleardata=clr_data)
         volumetric_fog.rendering(clr_data, depth_maps)

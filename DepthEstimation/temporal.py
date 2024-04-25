@@ -16,7 +16,7 @@ def align_depth_maps(depth_maps):
     y = depth_maps[0][::10, ::10].reshape(-1, 1)
     y_min = 0
     y_max = 1
-    for idx in tqdm(range(len(depth_maps)), desc='Aligning depth maps'):
+    for idx in tqdm(range(len(depth_maps)), desc='Aligning depth maps :'):
         depth_map_t1 = depth_maps[idx]
         X = depth_map_t1[::10, ::10].reshape(-1, 1)
 
