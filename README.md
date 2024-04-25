@@ -7,6 +7,8 @@ For more information, please refer to our preprint:
 > **[Into the Fog: Evaluating Multiple Object Tracking Robustness](https://arxiv.org/abs/2404.10534)**\
 Nadezda Kirillova, Muhammad Jehanzeb Mirza, Horst Possegger, Horst Bischof
 
+<img src="docs/pipeline.jpg" title="The MOT17 dataset augmentation with fog (smoke)"/>
+
 ## Setup
 
 1. Clone the repository recursively:
