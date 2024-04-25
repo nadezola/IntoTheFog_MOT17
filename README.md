@@ -9,6 +9,9 @@ Nadezda Kirillova, Muhammad Jehanzeb Mirza, Horst Possegger, Horst Bischof
 
 <img src="assets/pipeline.jpg" title="The MOT17 dataset augmentation with fog (smoke)"/>
 
+https://github.com/nadezola/IntoTheFog_MOT17/assets/53909145/310bb1fb-bbeb-401f-9774-e488a360fa1d
+
+
 ## Setup
 
 1. Clone the repository recursively:
