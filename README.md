@@ -1,6 +1,6 @@
 # Fog Simulation in Arbitrary Video Dataset
 
-We propose a framework for dataset augmentation with homogeneous and heterogeneous fog of different intensity levels, illustrated with the MOT17 dataset. 
+We propose a framework for dataset augmentation with homogeneous and heterogeneous fog of different intensity levels, illustrated in the MOT17 benchmark. 
 For more information, please refer to our preprint:
 
 > **[Into the Fog: Evaluating Multiple Object Tracking Robustness](https://arxiv.org/abs/2404.10534)**\
