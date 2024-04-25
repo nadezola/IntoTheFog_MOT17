@@ -1,7 +1,6 @@
-# Fog Rendering into MOTChallenge (MOT17 dataset)
+# Fog Simulation in Arbitrary Video Dataset
 
-We propose a pipeline for clear image augmentation of MOTChallenge (MOT17) dataset 
-with homogeneous and heterogeneous fog of different intensity levels. 
+We propose a framework for dataset augmentation with homogeneous and heterogeneous fog of different intensity levels. 
 For more information, please refer to our preprint:
 
 > **[Into the Fog: Evaluating Multiple Object Tracking Robustness](https://arxiv.org/abs/2404.10534)**\
@@ -9,7 +8,13 @@ Nadezda Kirillova, Muhammad Jehanzeb Mirza, Horst Possegger, Horst Bischof
 
 <img src="assets/pipeline.jpg" title="The MOT17 dataset augmentation with fog (smoke)"/>
 
+
+## Fog in MOT17 dataset
+Clear images are taken from [MOTChallenge benchmark](https://motchallenge.net/data/MOT17Det/)
+
 https://github.com/nadezola/IntoTheFog_MOT17/assets/53909145/310bb1fb-bbeb-401f-9774-e488a360fa1d
+
+https://github.com/nadezola/IntoTheFog_MOT17/assets/53909145/91de7368-934a-4bb1-99f4-17bdf1123884
 
 
 ## Setup
