@@ -10,9 +10,11 @@ Nadezda Kirillova, Muhammad Jehanzeb Mirza, Horst Possegger, Horst Bischof
 
 
 ## Fog in MOT17 dataset
-Clear images are taken from [MOTChallenge benchmark](https://motchallenge.net/data/MOT17Det/)
+Clear images are taken from [MOTChallenge benchmark](https://motchallenge.net/data/MOT17Det/). 
 
-* Daytime front-view square captured by a static camera:
+From left to right: _Clear Conditions_, _Homogeneous Fog_, _Heterogeneous Fog_.
+
+* Daytime front-view large square captured by a static camera:
 
 https://github.com/nadezola/IntoTheFog_MOT17/assets/53909145/310bb1fb-bbeb-401f-9774-e488a360fa1d
 
