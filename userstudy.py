@@ -9,7 +9,7 @@ def parth_args():
     # more options in opt.py
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', default=[
-                                            'data/mot17/val/clear/images/MOT17-02',
+                                            #'data/mot17/val/clear/images/MOT17-02',
                                             'outputs/EXPS-FOG/mot17/val_final_temporal/MOT17-02/fog_homo/2',
                                             'outputs/EXPS-FOG/mot17/val_final_temporal/MOT17-02/fog_hetero_0.8/3'
                                             ],
