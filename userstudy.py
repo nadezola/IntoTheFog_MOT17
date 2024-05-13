@@ -9,27 +9,33 @@ def parth_args():
     # more options in opt.py
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', default=[
-                                            #'data/mot17/val/clear/images/MOT17-02',
-                                            'outputs/EXPS-FOG/mot17/val_final_temporal/MOT17-02/fog_homo/2',
-                                            'outputs/EXPS-FOG/mot17/val_final_temporal/MOT17-02/fog_hetero_0.8/3'
+                                            'data/mot17/val/clear/images/MOT17-02',
+                                            'outputs/EXPS-FOG/mot17/val_final_temporal/MOT17-02/fog_homo/1',
+                                            #'outputs/EXPS-FOG/mot17/val_final/MOT17-13/fog_hetero_0.8/3'
                                             ],
                         help='List of img roots')
 
-    parser.add_argument('--outvideo', default='outputs/EXPS-FOG/mot17/vis_paper/MOT17-02-fog2-collage.mp4',
+    parser.add_argument('--out_video', default='outputs/EXPS-FOG/mot17/vis_paper/MOT17-02-fog1-clear-homo.mp4',
                         help='Output video path')
 
     args = parser.parse_args()
     return args
 
 
+def mkdir(path):
+    if not path.exists():
+        path.mkdir(parents=True)
+
+
 if __name__ == '__main__':
     args = parth_args()
     im_roots = [Path(p) for p in args.input]
-    out_video = args.outvideo
-    im_percent = 0.25
-    fps = 20
-    im_start = 0
-    im_numbers = 600
+    out_video = args.out_video
+    #mkdir(out)
+    im_percent = 0.5
+    fps = 25
+    im_start = 1
+    im_numbers = 500
 
     im_lists = [sorted(list(im_root.glob('*'))) for im_root in im_roots]
 
@@ -47,4 +53,5 @@ if __name__ == '__main__':
         # cv2.imshow('Collage', im_collage)
         # cv2.waitKey(0)
         video_writer.write(im_collage)
+        #cv2.imwrite(str(out / im_paths[0].name), im_collage)
     video_writer.release()

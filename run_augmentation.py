@@ -20,7 +20,7 @@ def parth_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', default='data/mot17/val/clear/images',
                         help='Root of clear images')
-    parser.add_argument('--out', default='outputs/EXPS-FOG/mot17/val_final_temporal',
+    parser.add_argument('--out', default='outputs/EXPS-FOG/mot17/val_final',
                         help='Output root')
     parser.add_argument('--loaddepth', action='store_true',
                         help='Load depth images instead of depth estimation')
@@ -41,8 +41,8 @@ if __name__ == '__main__':
 
     # clear_folders = sorted(list(clear_root.glob('*')))
     clear_folders = [
-        clear_root / 'MOT17-02',
-        # clear_root / 'MOT17-04',
+        # clear_root / 'MOT17-02',
+        clear_root / 'MOT17-04',
         # clear_root / 'MOT17-05',
         # clear_root / 'MOT17-09',
         # clear_root / 'MOT17-10',
