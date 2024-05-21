@@ -3,7 +3,7 @@
 We propose a framework for dataset augmentation with homogeneous and heterogeneous fog of different intensity levels, illustrated in the MOT17 benchmark. 
 For more information, please refer to our preprint:
 
-> **[Into the Fog: Evaluating Multiple Object Tracking Robustness](https://arxiv.org/abs/2404.10534)**\
+> **[Fog Simulation](https://arxiv.org/abs/2404.10534)**\
 Nadezda Kirillova, Muhammad Jehanzeb Mirza, Horst Possegger, Horst Bischof
 
 <img src="assets/pipeline.jpg" title="The MOT17 dataset augmentation with fog (smoke)"/>
