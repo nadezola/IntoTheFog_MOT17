@@ -17,8 +17,9 @@ def estimate(inv_depth_maps, cleardata):
     for (im_id, _), inv_depth in tqdm(zip(cleardata, inv_depth_maps), total=len(cleardata),
                                       desc='Metric estimation :'):
         seq_name = cleardata.seq_name
-        metric_depth = metric(inv_depth, min_dist=opt.seq_info[seq_name]['min_dist'],
-                                         max_dist=opt.seq_info[seq_name]['max_dist'])
+        # metric_depth = metric(inv_depth, min_dist=opt.seq_info[seq_name]['min_dist'],
+        #                                  max_dist=opt.seq_info[seq_name]['max_dist'])
+        metric_depth = metric(inv_depth, min_dist=0.5, max_dist=1e6)
         depth_maps.append(metric_depth)
         if opt.plot_metric_depth:
             plot.inverse_and_metric_depths(inv_depth, metric_depth, cleardata.plots_root, im_id)

@@ -9,13 +9,13 @@ def parth_args():
     # more options in opt.py
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', default=[
-                                            'data/mot17/val/clear/images/MOT17-02',
-                                            'outputs/EXPS-FOG/mot17/val_final_temporal/MOT17-02/fog_homo/1',
-                                            #'outputs/EXPS-FOG/mot17/val_final/MOT17-13/fog_hetero_0.8/3'
+                                            #'data/mot17/val/clear/images/MOT17-02',
+                                            'outputs/EXPS-FOG/mot17/val_final/MOT17-09/fog_homo/2',
+                                            'outputs/EXPS-FOG/mot17/val_final/MOT17-09/fog_hetero_0.5/2'
                                             ],
                         help='List of img roots')
 
-    parser.add_argument('--out_video', default='outputs/EXPS-FOG/mot17/vis_paper/MOT17-02-fog1-clear-homo.mp4',
+    parser.add_argument('--out_video', default='outputs/EXPS-FOG/mot17/vis_paper/MOT17-09-fog2-homo-hetero.mp4',
                         help='Output video path')
 
     args = parser.parse_args()
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     out_video = args.out_video
     #mkdir(out)
     im_percent = 0.5
-    fps = 25
+    fps = 20
     im_start = 1
     im_numbers = 500
 

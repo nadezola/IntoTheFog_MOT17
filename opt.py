@@ -1,18 +1,22 @@
 # Fog
-beta = [0.06, 0.15, 0.3, 1]     # Visibility less than [50m, 20m, 10m, 3m]
+#beta = [0.06, 0.15, 0.3, 1]     # Visibility less than [50m, 20m, 10m, 3m]
+# beta = [0.005, 0.01, 0.015, 0.03]     # Visibility less than [500m, 300m, 200m, 100m]
+beta = [2, 3, 4, 5]
 intensity = [1, 2, 3, 4]
 cloud_brightness = 0.5          # Heterogeneous Fog Brightness: 0.8 = 80% (available from 30% to 100%)
 
+img_shape = (607, 1080)
+
 # Atmospheric Light
-sky_threshold = 0.95            # "sky"-pixels are greater than this threshold
-dark_channel_patch = 10         # patch size for dark channel calculation
-dark_channel_top = 0.05         # percent of top brightest pixels: 0.05 = 5%
+sky_threshold = 0.01             # "sky"-pixels threshold (reduction from the maximal depth)
+dark_channel_patch = 15         # patch size for dark channel calculation
+dark_channel_top = 0.10         # percent of top brightest pixels: 0.05 = 5%
 
 # Visualization
-save_depth_gray = True
-save_depth_color = True
+save_depth_gray = False
+save_depth_color = False
 plot_metric_depth = False
-plot_turbulence_map = False
+plot_turbulence_map = True
 
 
 # 3D Reference Points

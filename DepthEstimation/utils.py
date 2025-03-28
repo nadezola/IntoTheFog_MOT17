@@ -42,8 +42,14 @@ def save_norm_depth(norm_depth, output_path, file_name, incolor=False):
 
 
 def load_depth(path):
-    ### 16-bit encoding
-    max_value = 2 ** 16 - 1
-    depth = cv2.imread(str(path), cv2.IMREAD_UNCHANGED) / max_value
+    # ### 16-bit encoding
+    # max_value = 2 ** 16 - 1
+    # depth = cv2.imread(str(path), cv2.IMREAD_UNCHANGED) / max_value
+
+    depthmap_255 = cv2.imread(str(path), cv2.IMREAD_GRAYSCALE)
+    if depthmap_255 is None:
+        raise ValueError(f'Failed to read depthmap from {depth_path}')
+
+    depth = 1 - depthmap_255 / 255.0
 
     return depth

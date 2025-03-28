@@ -1,27 +1,24 @@
-import cv2
 from pathlib import Path
+import numpy as np
+import cv2
 import opt
 
 
-class ClearDataset(object):
-    def __init__(self, args, clr_folder):
-        self.clr_imgs = sorted(list(clr_folder.glob('*')))
+class ClearDepthDataset(object):
+    def __init__(self, args, seq_path, depth_root):
+        self.idx = -1
+
+        img_folder = seq_path / "img1"
+        self.clr_imgs = sorted(list(img_folder.glob('*')))
         if len(self.clr_imgs) == 0:
             raise FileNotFoundError("No images found")
-
-        self.seq_name = clr_folder.name
         im = cv2.imread(str(self.clr_imgs[0]))
         self.img_size = im.shape[:-1]
-        self.idx = 0
 
-        # Output paths
-        self.out_root = Path(args.out)
-        self.depth_root = self.out_root / self.seq_name / 'depth_pred'
-        self.depth_cl_root = self.out_root / self.seq_name / 'depth_color'
-        self.plots_root = self.out_root / self.seq_name / 'depth_metric'
-        self.fog_homo_root = self.out_root / self.seq_name / 'fog_homo'
-        self.fog_hetero_root = self.out_root / self.seq_name / f'fog_hetero_{opt.cloud_brightness}'
+        self.seq_type = seq_path.parent.name
+        self.seq_name = seq_path.name
 
+        self.depth_root = Path(depth_root) / self.seq_type / self.seq_name / "depthmaps"
 
     def __len__(self):
         return len(self.clr_imgs)
@@ -30,18 +27,29 @@ class ClearDataset(object):
         return self
 
     def __next__(self):
+        self.idx += 1
         if self.idx >= len(self.clr_imgs):
-            self.idx = 0
+            self.idx = -1
             raise StopIteration
 
-        im_id = self.clr_imgs[self.idx].stem
-        im = cv2.cvtColor(cv2.imread(str(self.clr_imgs[self.idx])), cv2.COLOR_BGR2RGB) / 255.0
-        self.idx += 1
+        img_stem, img_norm, depthmap = self.__getitem__(self.idx)
 
-        return im_id, im
+        return img_stem, img_norm, depthmap
 
     def __getitem__(self, i):
-        im = cv2.cvtColor(cv2.imread(str(self.clr_imgs[i])), cv2.COLOR_BGR2RGB) / 255.0
-        return im
+        img_stem = self.clr_imgs[i].stem
+
+        img = cv2.imread(str(self.clr_imgs[i]))
+        img_norm = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) / 255.0
+
+        depth_file = self.depth_root / f'{img_stem}.png'
+        if not depth_file.exists():
+            raise FileNotFoundError(f'For image {img_stem} the depth map {depth_file} does not exist!')
+
+        depthmap_255 = cv2.imread(str(depth_file), cv2.IMREAD_GRAYSCALE)
+        depthmap = 1 - depthmap_255 / 255.0
+        depthmap = np.expand_dims(depthmap, axis=2)
+
+        return img_stem, img_norm, depthmap
 
 
