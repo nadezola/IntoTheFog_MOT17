@@ -7,7 +7,6 @@ import logging
 from perlin_numpy import generate_fractal_noise_2d
 from FogRendering import atmospheric_light
 from DepthEstimation.utils import normalize
-from DepthEstimation.metric_depth import metric
 import opt
 
 logger = logging.getLogger('FogRendering')
@@ -17,15 +16,16 @@ def mkdir(path):
         path.mkdir(parents=True)
 
 
-def perlin_noise_map(img_shape, map_shape=(640, 640), res=(4, 4), octave=6, cloud_brightness=1):
+def perlin_noise_map(img_shape, map_shape=(1024, 1024), res=(4, 4), octave=6, cloud_brightness=1):
     assert 0.3 <= cloud_brightness <= 1, "Cloud brightness should be in range [0.3, 1]"
-    h, w = img_shape
-    np.random.seed(42)
-    #noise = generate_fractal_noise_2d((1024, 1024), (16, 16), 6)
+
+    np.random.seed(0)
     noise = generate_fractal_noise_2d(map_shape, res, octave)
-    #noise = cv2.resize(noise, shape[::-1])
-    noise = cv2.resize(noise, (w, w), interpolation=cv2.INTER_LINEAR)
-    noise = noise[:h, :]
+
+    h, w = img_shape
+    base = max(h, w)
+    noise = cv2.resize(noise, (base, base), interpolation=cv2.INTER_LINEAR)
+    noise = noise[:h, :w]
     noise_normalize = normalize(noise, scope=(1-cloud_brightness, 1))
 
     return np.expand_dims(noise_normalize, axis=2)
@@ -57,7 +57,7 @@ def rendering(dataloader, fog_homo_path, fog_hetero_path):
     #     # atm_light = 0.7
     logger.info(f'Atmospheric light={atm_light:.2f}')
 
-    turbulence_map = perlin_noise_map(probe_img.shape[:2], (1024, 1024), (16, 16), 6,
+    turbulence_map = perlin_noise_map(probe_img.shape[:2], (1024, 1024), (4, 4), 8,
                                       cloud_brightness=opt.cloud_brightness)
     # turbulence_map *= perlin_noise_map(opt.img_shape, (640, 640), (10, 10), 6,
     #                                   cloud_brightness=opt.cloud_brightness)

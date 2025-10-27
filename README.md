@@ -1,42 +1,29 @@
-# Fog Rendering into MOTChallenge (MOT17 dataset)
+# Fog Rendering on Private Data (Airport Surveillance)
 
-We propose a pipeline for clear image augmentation of MOTChallenge (MOT17) dataset 
-with homogeneous and heterogeneous fog of different intensity levels. 
-For more information, please refer to our preprint:
+This branch enables fog augmentation on airport surveillance images.
+It supports both homogeneous and heterogeneous fog with varying intensity levels.
+For more information, please refer to our paper:
 
-> **[Into the Fog: Evaluating Multiple Object Tracking Robustness](https://arxiv.org/abs/2404.10534)**\
-Nadezda Kirillova, Muhammad Jehanzeb Mirza, Horst Possegger, Horst Bischof
+> **[Into the Fog: Evaluating Robustness of Multiple Object Tracking](https://bmvc2024.org/proceedings/362/)**\
+Nadezda Kirillova, Muhammad Jehanzeb Mirza, Horst Bischof, Horst Possegger
 
 ## Setup
 
-1. Clone the repository recursively:
+1. Clone the repository (branhc: private_data)
 ```bash
-git clone --recurse-submodules https://github.com/nadezola/IntoTheFog_MOT17.git
+git clone -b private_data https://github.com/nadezola/IntoTheFog_MOT17.git
 ```
-* If you already cloned and forgot to use `--recurse-submodules` you can run `git submodule update --init`
 
-2. We recommend to use:
-* Ubuntu 20.04
-* CUDA 10.2
-* Python 3.7 virtual environment with `requirements.txt`
-```bash
-python3.7 -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-```
+2. We use:
+* Python 3.9
+* CUDA 12.1
+* pytorch 2.4
+
 
 3. Working directory is the root of the repository.
 
-## Model and Data preparation
-1. We leverage the code for monocular depth estimation from 
-[MiDaS](https://github.com/isl-org/MiDaS/tree/bdc4ed64c095e026dc0a2f17cabb14d58263decb):
-   * Download the pretrained model [dpt_beit_large_512.pt](https://github.com/isl-org/MiDaS/releases/download/v3_1/dpt_beit_large_512.pt)
-and put it in `./DepthEstimation/weights`
-
-2. Download [MOT17 dataset](https://motchallenge.net/data/MOT17Det/) images
-(we place them in `./data/mot17/train/clear/images`).
-
+4. We leverage the monocular depth estimation pipeline provided 
+by the [Hugging Face Transformers library](https://huggingface.co/docs/transformers).
 
 ## Run
 
@@ -44,17 +31,18 @@ and put it in `./DepthEstimation/weights`
 2. Run:
     ```bash
     python run_augmentation.py --input       # Specify the path to clear images
-                               --out         # Specify the path to outputs
-                               --loaddepth   # [optional] Load depth images instead of run depth estimation (default loading from '[outroot]/[seqname]/depth_pred')
+                               --out         # Specify the path where to save the outputs
+                               --loaddepth   # [optional] Load depth images instead of run depth estimation
     ```
 
 ##  Citation 
 If you find our code useful, please reference:
 
-    @article{kirillova2024fogmot17
-      title={{Into the Fog: Evaluating Multiple Object Tracking Robustness}},
-      author={Kirillova, Nadezda and Mirza M. Jehanzeb and Possegger, Horst and Bischof, Horst},
-      journal={arXiv preprint: 2404.10534},
-      year={2024},
-      note= {\url{https://arxiv.org/abs/2404.10534}},
+    @inproceedings{Kirillova_2024_BMVC,
+      title = {{Into the Fog: Evaluating Robustness of Multiple Object Tracking}},
+      author = {Nadezda Kirillova and Muhammad Jehanzeb Mirza and Horst Bischof and Horst Possegger},
+      booktitle = {35th British Machine Vision Conference 2024, {BMVC} 2024, Glasgow, UK, November 25-28, 2024},
+      publisher = {BMVA},
+      year = {2024},
+      url = {https://papers.bmvc2024.org/0362.pdf},
     }
