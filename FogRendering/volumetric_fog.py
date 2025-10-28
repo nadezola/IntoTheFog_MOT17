@@ -31,61 +31,49 @@ def perlin_noise_map(img_shape, map_shape=(1024, 1024), res=(4, 4), octave=6, cl
     return np.expand_dims(noise_normalize, axis=2)
 
 
-def optical_model(image, depth, intensity, L_inf, turbulence):
+def optical_model_homo(image, depth, intensity, L_inf):
     beta = opt.beta[intensity - 1]
-
-    # Homogeneous Fog
     T = np.exp(-beta * depth)
     fog_homo_img = T * image + L_inf * (1 - T)
 
-    # Heterogeneous Fog
+    return fog_homo_img
+
+
+def optical_model_hetero(image, depth, intensity, L_inf, turbulence):
+    beta = opt.beta[intensity - 1]
     T = np.exp(-(beta + 0.5) * depth * turbulence)
     fog_hetero_img = T * image + L_inf * (1 - T)
 
-    return fog_homo_img, fog_hetero_img
+    return fog_hetero_img
 
 
 def rendering(dataloader, fog_homo_path, fog_hetero_path):
-
-    # if opt.seq_info[cleardata.seq_name]['max_dist'] == 1e6:
     _, probe_img, probe_depth = dataloader[0]
     atm_light = atmospheric_light.horizon_intensity(probe_img, np.squeeze(probe_depth))
-    # else:
-    #     atm_light = atmospheric_light.dark_channel(image=cleardata[0])
-    #     # atm_light = atmospheric_light.intensity(image=cleardata[0])
-    #     # atm_light = atmospheric_light.brightest10(image=cleardata[0])
-    #     # atm_light = 0.7
     logger.info(f'Atmospheric light={atm_light:.2f}')
 
     turbulence_map = perlin_noise_map(probe_img.shape[:2], (1024, 1024), (4, 4), 8,
                                       cloud_brightness=opt.cloud_brightness)
-    # turbulence_map *= perlin_noise_map(opt.img_shape, (640, 640), (10, 10), 6,
-    #                                   cloud_brightness=opt.cloud_brightness)
-    # turbulence_map *= perlin_noise_map(opt.img_shape, (640, 640), (4, 4), 6,
-    #                                   cloud_brightness=opt.cloud_brightness)
-    #turbulence_map *= perlin_noise_map(opt.img_shape, cloud_brightness=opt.cloud_brightness)
     for intensity in opt.intensity:
-        save_path_homo = fog_homo_path / f'{intensity}'
-        save_path_hetero = fog_hetero_path / f'{intensity}'
-        mkdir(save_path_homo)
-        mkdir(save_path_hetero)
+        if fog_homo_path is not None:
+            save_path_homo = fog_homo_path / f'{intensity}'
+            save_path_homo.mkdir(parents=True, exist_ok=True)
+
+        if fog_hetero_path is not None:
+            save_path_hetero = fog_hetero_path / f'{intensity}'
+            save_path_hetero.mkdir(parents=True, exist_ok=True)
 
         for img_stem, img, depthmap in tqdm(dataloader, total=len(dataloader), desc=f'Fog {intensity} rendering :'):
 
-            fog_homo_img, fog_hetero_img = optical_model(img, depthmap, intensity,
-                                                         atm_light, turbulence_map)
+            if fog_homo_path is not None:
+                fog_homo_img = optical_model_homo(img, depthmap, intensity, atm_light)
+                fog_homo_BGR = cv2.cvtColor(fog_homo_img.astype(np.float32), cv2.COLOR_RGB2BGR) * 255.0
+                cv2.imwrite(str(save_path_homo / f'{img_stem}.jpg'), fog_homo_BGR)
 
-            fog_homo_BGR = cv2.cvtColor(fog_homo_img.astype(np.float32), cv2.COLOR_RGB2BGR) * 255.0
-            fog_hetero_BGR = cv2.cvtColor(fog_hetero_img.astype(np.float32), cv2.COLOR_RGB2BGR) * 255.0
-
-            # brightness = -38  # Brightness control
-            # fog_homo_adjusted = cv2.convertScaleAbs(fog_homo_BGR, alpha=1, beta=brightness)
-            # fog_hetero_adjusted = cv2.convertScaleAbs(fog_hetero_BGR, alpha=1, beta=brightness)
-            # cv2.imwrite(str(save_path_homo / f'{im_id}.jpg'), fog_homo_adjusted)
-            # cv2.imwrite(str(save_path_hetero / f'{im_id}.jpg'), fog_hetero_adjusted)
-
-            cv2.imwrite(str(save_path_homo / f'{img_stem}.jpg'), fog_homo_BGR)
-            cv2.imwrite(str(save_path_hetero / f'{img_stem}.jpg'), fog_hetero_BGR)
+            if fog_hetero_path is not None:
+                fog_hetero_img = optical_model_hetero(img, depthmap, intensity, atm_light, turbulence_map)
+                fog_hetero_BGR = cv2.cvtColor(fog_hetero_img.astype(np.float32), cv2.COLOR_RGB2BGR) * 255.0
+                cv2.imwrite(str(save_path_hetero / f'{img_stem}.jpg'), fog_hetero_BGR)
 
     if opt.plot_turbulence_map:
         fig = plt.figure()
@@ -93,5 +81,3 @@ def rendering(dataloader, fog_homo_path, fog_hetero_path):
         ax.imshow(np.squeeze(turbulence_map, axis=2), cmap='gray')
         fig.savefig(fog_hetero_path / 'turbulence_map.png')
         plt.close()
-
-    logger.info(f'Fog augmentation results are saved in {str(fog_homo_path.parent)}')

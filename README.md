@@ -30,7 +30,7 @@ by the [Hugging Face Transformers library](https://huggingface.co/docs/transform
 1. Configure the file `opt.py`.
 2. Run:
     ```bash
-    python run_augmentation.py --input       # Specify the path to clear images
+    python run_augmentation.py --input       # Specify the path to a data split
                                --out         # Specify the path where to save the outputs
                                --loaddepth   # [optional] Load depth images instead of run depth estimation
     ```
